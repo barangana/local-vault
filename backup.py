@@ -1,13 +1,7 @@
-#curl -L \
-#  -H "Accept: application/vnd.github+json" \
-#  -H "Authorization: Bearer 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" \
-#  -H "X-GitHub-Api-Version: 2026-03-10" \
-#  https://api.github.com/repos/barangana/pantry
-
-
 import requests
 import json
 import os
+from datetime import datetime
 from dotenv import load_dotenv
 
 def load_configs():
@@ -15,14 +9,30 @@ def load_configs():
         data = json.load(file)
         return data
 
+def save_configs(configs):
+    with open("configs.json", "w") as file:
+        json.dump(configs, file, indent=2)
+
+def download_backup(repo_name, username, headers, backup_dir, timestamp):
+    response = requests.get(f"https://api.github.com/repos/{username}/{repo_name}/zipball", headers=headers)
+
+    if response.status_code == 200:
+        filename = f"{repo_name}_{timestamp}.zip"
+        filepath = os.path.join(backup_dir, filename)
+        with open(filepath, "wb") as file:
+            file.write(response.content)
+            print(f"Downloaded {repo_name} to {filepath}")
 
 def main():
     load_dotenv()
     configs = load_configs()
 
+    backup_dir = configs["backup_dir"]
     username = configs["username"]
     repos_to_track = configs["repos_to_track"]
     bearer_token = os.getenv("BEARER_TOKEN")
+
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
     headers = {
         "Authorization": f"Bearer {bearer_token}",
@@ -32,13 +42,14 @@ def main():
     response = requests.get("https://api.github.com/user/repos", headers=headers)
     data = response.json()
 
-    # print(json.dumps(data, indent=2))
-
-    for repo in data:
-        if repo["name"] in repos_to_track:
-            print(repo["name"])
-            print(repo["pushed_at"])
-            print(True)
+    for tracked_repo in repos_to_track:
+        for repo in data:
+            if tracked_repo["name"] == repo["name"]:
+                print(tracked_repo["name"])
+                tracked_repo["pushed_at"] = repo["pushed_at"]
+                tracked_repo["last_back_up"] = timestamp
+                download_backup(repo["name"], username, headers, backup_dir, timestamp)
+    save_configs(configs)
 
 if __name__ == "__main__":
     main()

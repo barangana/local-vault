@@ -1,4 +1,11 @@
 {
-  "username": "",
-  "repos_to_track": [""]
+  "username": "username_to_fill",
+  "repos_to_track": [
+    {
+      "name": "repo_name",
+      "pushed_at": "",
+      "last_back_up": ""
+    }
+  ],
+  "backup_dir": ""
 }
