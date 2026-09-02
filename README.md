@@ -59,3 +59,5 @@ Open `configs.json` and fill in your own values:
 - `backup_dir` — the full path to the folder where ZIP files will be saved
 - `repos_to_track` — list of repositories you want to back up. Leave `pushed_at` and `last_back_up` empty on first run.
 ---
+
+<img width="601" height="565" alt="CRON job" src="https://github.com/user-attachments/assets/d297be9c-99d6-4692-baf3-d0a1476a30e4" />
